@@ -2,14 +2,17 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'school_management',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  max: 20,
+  host: process.env.DB_HOST || process.env.PGHOST || 'localhost',
+  port: process.env.DB_PORT || process.env.PGPORT || 5432,
+  database: process.env.DB_NAME || process.env.PGDATABASE || 'school_management',
+  user: process.env.DB_USER || process.env.PGUSER || 'postgres',
+  password: process.env.DB_PASSWORD || process.env.PGPASSWORD || 'postgres',
+  // Optimized for Railway/Hobby plans: reduce max connections to avoid hitting limits
+  max: parseInt(process.env.DB_MAX_CONNECTIONS) || 15,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+  // Enable SSL for production (Railway requires SSL)
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('connect', () => {

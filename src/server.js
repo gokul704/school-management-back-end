@@ -6,6 +6,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
+// Railway and other platforms set PORT automatically
 const PORT = process.env.PORT || 3001;
 
 // Middleware
