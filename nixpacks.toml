@@ -1,6 +1,6 @@
 # Railway Nixpacks configuration for Node.js backend
 [phases.setup]
-nixPkgs = ["nodejs-18_x", "npm-9_x"]
+nixPkgs = ["nodejs-18_x"]
 
 [phases.install]
 cmds = ["npm ci"]
