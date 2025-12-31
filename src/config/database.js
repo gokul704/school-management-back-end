@@ -11,8 +11,9 @@ const pool = new Pool({
   max: parseInt(process.env.DB_MAX_CONNECTIONS) || 15,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-  // Enable SSL for production (Railway requires SSL)
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // SSL configuration - Railway internal connections don't require SSL
+  // Only enable SSL if explicitly required (external connections)
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('connect', () => {
