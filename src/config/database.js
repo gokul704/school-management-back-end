@@ -16,8 +16,10 @@ const pool = new Pool({
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
-pool.on('connect', () => {
+pool.on('connect', (client) => {
   console.log('✅ Connected to PostgreSQL database');
+  // Explicitly set search_path to public to ensure all queries use the correct schema
+  client.query('SET search_path TO public');
 });
 
 pool.on('error', (err) => {
