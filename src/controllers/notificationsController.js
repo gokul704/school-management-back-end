@@ -146,7 +146,7 @@ const createForAdmins = async (title, message, type = 'info', link = null) => {
   try {
     // Get all admin and principal users
     const adminUsers = await pool.query(
-      'SELECT id FROM users WHERE role IN ($1, $2)',
+      'SELECT id FROM public.users WHERE role IN ($1, $2)',
       ['admin', 'principal']
     );
 

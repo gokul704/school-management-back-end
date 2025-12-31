@@ -10,7 +10,7 @@ const register = async (req, res) => {
 
     // Check if user exists
     const existingUser = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
+      'SELECT id FROM public.users WHERE email = $1',
       [email]
     );
 
@@ -24,7 +24,7 @@ const register = async (req, res) => {
 
     // Create user
     const result = await pool.query(
-      `INSERT INTO users (id, email, password, name, role, active, created_at)
+      `INSERT INTO public.users (id, email, password, name, role, active, created_at)
        VALUES ($1, $2, $3, $4, $5, true, NOW())
        RETURNING id, email, name, role, created_at`,
       [id, email, hashedPassword, name, role]
@@ -58,9 +58,9 @@ const login = async (req, res) => {
     const dbCheck = await pool.query('SELECT current_database() as db, (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = \'public\' AND table_name = \'users\') as users_exists');
     console.log(`[Login] Connected to DB: ${dbCheck.rows[0].db}, Users table exists: ${dbCheck.rows[0].users_exists > 0}`);
 
-    // Find user
+    // Find user (explicitly use public schema to avoid search path issues)
     const result = await pool.query(
-      'SELECT id, email, password, name, role, active FROM users WHERE email = $1',
+      'SELECT id, email, password, name, role, active FROM public.users WHERE email = $1',
       [email]
     );
 
@@ -120,7 +120,7 @@ const refresh = async (req, res) => {
 const getCurrentUser = async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, email, name, role, avatar, created_at FROM users WHERE id = $1',
+      'SELECT id, email, name, role, avatar, created_at FROM public.users WHERE id = $1',
       [req.user.id]
     );
 
@@ -157,7 +157,7 @@ const updateProfile = async (req, res) => {
     // Check if email is being changed and if it's already taken
     if (email) {
       const existingUser = await pool.query(
-        'SELECT id FROM users WHERE email = $1 AND id != $2',
+        'SELECT id FROM public.users WHERE email = $1 AND id != $2',
         [email, userId]
       );
 
@@ -191,7 +191,7 @@ const updateProfile = async (req, res) => {
     updateValues.push(userId);
 
     const query = `
-      UPDATE users 
+      UPDATE public.users 
       SET ${updateFields.join(', ')}
       WHERE id = $${paramCount}
       RETURNING id, email, name, role, avatar, created_at, updated_at
@@ -234,7 +234,7 @@ const changePassword = async (req, res) => {
 
     // Get current user
     const userResult = await pool.query(
-      'SELECT password FROM users WHERE id = $1',
+      'SELECT password FROM public.users WHERE id = $1',
       [userId]
     );
 
@@ -253,7 +253,7 @@ const changePassword = async (req, res) => {
 
     // Update password
     await pool.query(
-      'UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2',
+      'UPDATE public.users SET password = $1, updated_at = NOW() WHERE id = $2',
       [hashedPassword, userId]
     );
 
