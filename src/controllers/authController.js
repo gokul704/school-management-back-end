@@ -54,6 +54,10 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Verify database connection and schema
+    const dbCheck = await pool.query('SELECT current_database() as db, (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = \'public\' AND table_name = \'users\') as users_exists');
+    console.log(`[Login] Connected to DB: ${dbCheck.rows[0].db}, Users table exists: ${dbCheck.rows[0].users_exists > 0}`);
+
     // Find user
     const result = await pool.query(
       'SELECT id, email, password, name, role, active FROM users WHERE email = $1',
